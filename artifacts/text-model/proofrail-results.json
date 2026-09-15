@@ -1,0 +1,298 @@
+{
+  "framework": "Proofrail",
+  "spec_id": "ledgerkit-verifier-semantics-v1",
+  "spec_name": "LedgerKit verifier semantics",
+  "decision": "RELEASE",
+  "stages": {
+    "intake_scan": {
+      "passed": true,
+      "errors": []
+    },
+    "overlap_scan": {
+      "passed": true,
+      "maximum": 0.10227677139022054,
+      "matches": [
+        {
+          "id": "billing-agent-policy-v2",
+          "name": "Billing agent refund policy",
+          "similarity": 0.10227677139022054
+        },
+        {
+          "id": "catalog-grounding-v1",
+          "name": "Catalog assistant grounding",
+          "similarity": 0.056210332714818435
+        }
+      ]
+    },
+    "anchor_controls": {
+      "passed": true,
+      "oracle": {
+        "id": "oracle",
+        "score": 1.0,
+        "passed": true,
+        "criteria": [
+          {
+            "id": "verification_contract",
+            "description": "States that verification checks signatures and integrity before acceptance.",
+            "score": 1.0,
+            "weight": 0.35,
+            "contribution": 0.35,
+            "evidence": "all terms present",
+            "passed": true
+          },
+          {
+            "id": "fail_closed",
+            "description": "Explains that malformed or unverifiable evidence is rejected by default.",
+            "score": 1.0,
+            "weight": 0.3,
+            "contribution": 0.3,
+            "evidence": "all terms present",
+            "passed": true
+          },
+          {
+            "id": "traceability",
+            "description": "Requires an auditable record of the decision.",
+            "score": 1.0,
+            "weight": 0.2,
+            "contribution": 0.2,
+            "evidence": "matched: audit log",
+            "passed": true
+          },
+          {
+            "id": "review_quality",
+            "description": "Calibrated reviewer assessment of clarity and technical coherence.",
+            "score": 1.0,
+            "weight": 0.15,
+            "contribution": 0.15,
+            "evidence": "calibrated external review score",
+            "passed": true
+          }
+        ],
+        "forbidden_hits": [],
+        "latency_ms": null,
+        "cost_usd": null,
+        "provider": null,
+        "model": null
+      },
+      "negative": {
+        "id": "negative",
+        "score": 0.0,
+        "passed": false,
+        "criteria": [
+          {
+            "id": "verification_contract",
+            "description": "States that verification checks signatures and integrity before acceptance.",
+            "score": 0.0,
+            "weight": 0.35,
+            "contribution": 0.0,
+            "evidence": "missing: signature, integrity, before acceptance",
+            "passed": false
+          },
+          {
+            "id": "fail_closed",
+            "description": "Explains that malformed or unverifiable evidence is rejected by default.",
+            "score": 0.0,
+            "weight": 0.3,
+            "contribution": 0.0,
+            "evidence": "missing: malformed, reject, fail closed",
+            "passed": false
+          },
+          {
+            "id": "traceability",
+            "description": "Requires an auditable record of the decision.",
+            "score": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "evidence": "no expected term found",
+            "passed": false
+          },
+          {
+            "id": "review_quality",
+            "description": "Calibrated reviewer assessment of clarity and technical coherence.",
+            "score": 0.0,
+            "weight": 0.15,
+            "contribution": 0.0,
+            "evidence": "calibrated external review score",
+            "passed": false
+          }
+        ],
+        "forbidden_hits": [],
+        "latency_ms": null,
+        "cost_usd": null,
+        "provider": null,
+        "model": null
+      }
+    },
+    "trial_scoring": {
+      "passed": true,
+      "pass_rate": 0.666667,
+      "mean_score": 0.659167,
+      "passed_count": 2,
+      "total_count": 3,
+      "runs": [
+        {
+          "id": "trial-01",
+          "score": 0.9925,
+          "passed": true,
+          "criteria": [
+            {
+              "id": "verification_contract",
+              "description": "States that verification checks signatures and integrity before acceptance.",
+              "score": 1.0,
+              "weight": 0.35,
+              "contribution": 0.35,
+              "evidence": "all terms present",
+              "passed": true
+            },
+            {
+              "id": "fail_closed",
+              "description": "Explains that malformed or unverifiable evidence is rejected by default.",
+              "score": 1.0,
+              "weight": 0.3,
+              "contribution": 0.3,
+              "evidence": "all terms present",
+              "passed": true
+            },
+            {
+              "id": "traceability",
+              "description": "Requires an auditable record of the decision.",
+              "score": 1.0,
+              "weight": 0.2,
+              "contribution": 0.2,
+              "evidence": "matched: audit log",
+              "passed": true
+            },
+            {
+              "id": "review_quality",
+              "description": "Calibrated reviewer assessment of clarity and technical coherence.",
+              "score": 0.95,
+              "weight": 0.15,
+              "contribution": 0.1425,
+              "evidence": "calibrated external review score",
+              "passed": true
+            }
+          ],
+          "forbidden_hits": [],
+          "latency_ms": 1240,
+          "cost_usd": 0.0132,
+          "provider": null,
+          "model": null
+        },
+        {
+          "id": "trial-02",
+          "score": 0.985,
+          "passed": true,
+          "criteria": [
+            {
+              "id": "verification_contract",
+              "description": "States that verification checks signatures and integrity before acceptance.",
+              "score": 1.0,
+              "weight": 0.35,
+              "contribution": 0.35,
+              "evidence": "all terms present",
+              "passed": true
+            },
+            {
+              "id": "fail_closed",
+              "description": "Explains that malformed or unverifiable evidence is rejected by default.",
+              "score": 1.0,
+              "weight": 0.3,
+              "contribution": 0.3,
+              "evidence": "all terms present",
+              "passed": true
+            },
+            {
+              "id": "traceability",
+              "description": "Requires an auditable record of the decision.",
+              "score": 1.0,
+              "weight": 0.2,
+              "contribution": 0.2,
+              "evidence": "matched: event ledger",
+              "passed": true
+            },
+            {
+              "id": "review_quality",
+              "description": "Calibrated reviewer assessment of clarity and technical coherence.",
+              "score": 0.9,
+              "weight": 0.15,
+              "contribution": 0.135,
+              "evidence": "calibrated external review score",
+              "passed": true
+            }
+          ],
+          "forbidden_hits": [],
+          "latency_ms": 1180,
+          "cost_usd": 0.0128,
+          "provider": null,
+          "model": null
+        },
+        {
+          "id": "trial-03",
+          "score": 0.0,
+          "passed": false,
+          "criteria": [
+            {
+              "id": "verification_contract",
+              "description": "States that verification checks signatures and integrity before acceptance.",
+              "score": 0.0,
+              "weight": 0.35,
+              "contribution": 0.0,
+              "evidence": "missing: integrity, before acceptance",
+              "passed": false
+            },
+            {
+              "id": "fail_closed",
+              "description": "Explains that malformed or unverifiable evidence is rejected by default.",
+              "score": 0.0,
+              "weight": 0.3,
+              "contribution": 0.0,
+              "evidence": "missing: malformed, reject, fail closed",
+              "passed": false
+            },
+            {
+              "id": "traceability",
+              "description": "Requires an auditable record of the decision.",
+              "score": 1.0,
+              "weight": 0.2,
+              "contribution": 0.2,
+              "evidence": "matched: audit log",
+              "passed": true
+            },
+            {
+              "id": "review_quality",
+              "description": "Calibrated reviewer assessment of clarity and technical coherence.",
+              "score": 0.45,
+              "weight": 0.15,
+              "contribution": 0.0675,
+              "evidence": "calibrated external review score",
+              "passed": false
+            }
+          ],
+          "forbidden_hits": [
+            "accept.*without.*verif"
+          ],
+          "latency_ms": 980,
+          "cost_usd": 0.0101,
+          "provider": null,
+          "model": null
+        }
+      ]
+    },
+    "evidence_audit": {
+      "failure_classes": {
+        "verification_contract": 1,
+        "fail_closed": 1,
+        "review_quality": 1,
+        "forbidden:accept.*without.*verif": 1
+      }
+    },
+    "spend_summary": {
+      "total_cost_usd": 0.0361,
+      "average_cost_usd": 0.012033,
+      "average_latency_ms": 1133.33
+    },
+    "release_gate": {
+      "passed": true
+    }
+  }
+}

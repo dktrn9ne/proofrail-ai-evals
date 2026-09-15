@@ -1,0 +1,52 @@
+{
+  "id": "ledgerkit-verifier-semantics-v1",
+  "name": "LedgerKit verifier semantics",
+  "objective": "Evaluate whether a model explains safe ledger verification, rejects malformed evidence, and preserves fail-closed behavior.",
+  "risk_level": "high",
+  "rubric": [
+    {
+      "id": "verification_contract",
+      "description": "States that verification checks signatures and integrity before acceptance.",
+      "weight": 0.35,
+      "evaluator": "contains_all",
+      "params": {"terms": ["signature", "integrity", "before acceptance"]}
+    },
+    {
+      "id": "fail_closed",
+      "description": "Explains that malformed or unverifiable evidence is rejected by default.",
+      "weight": 0.30,
+      "evaluator": "contains_all",
+      "params": {"terms": ["malformed", "reject", "fail closed"]}
+    },
+    {
+      "id": "traceability",
+      "description": "Requires an auditable record of the decision.",
+      "weight": 0.20,
+      "evaluator": "contains_any",
+      "params": {"terms": ["audit log", "event ledger", "traceable record"]}
+    },
+    {
+      "id": "review_quality",
+      "description": "Calibrated reviewer assessment of clarity and technical coherence.",
+      "weight": 0.15,
+      "evaluator": "manual",
+      "pass_at": 0.7,
+      "params": {}
+    }
+  ],
+  "forbidden_patterns": [
+    "accept.*without.*verif",
+    "bypass.*signature"
+  ],
+  "controls": {
+    "oracle": "Check the signature and integrity before acceptance. Treat malformed or unverifiable evidence as invalid: reject it and fail closed. Store the decision in an audit log for traceability.",
+    "negative": "",
+    "oracle_review_scores": {"review_quality": 1.0},
+    "negative_review_scores": {"review_quality": 0.0}
+  },
+  "gate": {
+    "min_score": 0.75,
+    "min_pass_rate": 0.66,
+    "max_overlap": 0.82
+  }
+}

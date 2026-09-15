@@ -1,0 +1,23 @@
+[
+  {
+    "id": "trial-01",
+    "output": "The verifier must check the signature and integrity before acceptance. If evidence is malformed, reject it and fail closed. Record the outcome in an audit log.",
+    "review_scores": {"review_quality": 0.95},
+    "latency_ms": 1240,
+    "cost_usd": 0.0132
+  },
+  {
+    "id": "trial-02",
+    "output": "Validate the signature and integrity before acceptance. Malformed evidence should trigger a reject decision and fail closed, with an event ledger capturing the outcome.",
+    "review_scores": {"review_quality": 0.9},
+    "latency_ms": 1180,
+    "cost_usd": 0.0128
+  },
+  {
+    "id": "trial-03",
+    "output": "Check the signature when convenient and write an audit log. The system can accept evidence without verification if parsing fails.",
+    "review_scores": {"review_quality": 0.45},
+    "latency_ms": 980,
+    "cost_usd": 0.0101
+  }
+]

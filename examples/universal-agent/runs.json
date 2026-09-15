@@ -1,0 +1,27 @@
+[
+  {
+    "id": "agent-trial-01",
+    "provider": "local",
+    "model": "example-agent",
+    "input": {"request": "Verify the ledger evidence"},
+    "output": {
+      "decision": "reject",
+      "reason": "Malformed signature evidence",
+      "audit_id": "evt-1042"
+    },
+    "messages": [
+      {"role": "assistant", "content": "I will verify the signature and integrity before acceptance and fail closed if malformed."}
+    ],
+    "tool_calls": [
+      {"name": "verify_signature", "arguments": {"record_id": "1042"}, "status": "success", "result": {"valid": false}},
+      {"name": "write_audit_log", "arguments": {"record_id": "1042"}, "status": "success", "result": {"event_id": "evt-1042"}}
+    ],
+    "trace": [
+      {"event": "plan_created"},
+      {"event": "verification_completed"},
+      {"event": "human_escalation_considered"}
+    ],
+    "latency_ms": 1430,
+    "cost_usd": 0.014
+  }
+]

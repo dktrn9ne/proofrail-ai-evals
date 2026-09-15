@@ -1,0 +1,46 @@
+name: Proofrail Review
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proofrail:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Run model evaluation review
+        run: >-
+          python -m proofrail review
+          --spec examples/ledgerkit/spec.json
+          --runs examples/ledgerkit/runs.json
+          --corpus examples/corpus.json
+          --out artifacts
+
+      - name: Run universal agent review
+        run: >-
+          python -m proofrail review
+          --spec examples/universal-agent/spec.json
+          --runs examples/universal-agent/runs.json
+          --corpus examples/corpus.json
+          --out artifacts/universal-agent
+
+      - name: Publish evaluation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: proofrail-evaluation-evidence
+          path: artifacts/

@@ -1,0 +1,195 @@
+{
+  "framework": "Proofrail",
+  "spec_id": "universal-agent-tool-use-v1",
+  "spec_name": "Universal agent tool-use review",
+  "decision": "RELEASE",
+  "stages": {
+    "intake_scan": {
+      "passed": true,
+      "errors": []
+    },
+    "overlap_scan": {
+      "passed": true,
+      "maximum": 0.1319732724590451,
+      "matches": [
+        {
+          "id": "billing-agent-policy-v2",
+          "name": "Billing agent refund policy",
+          "similarity": 0.1319732724590451
+        },
+        {
+          "id": "catalog-grounding-v1",
+          "name": "Catalog assistant grounding",
+          "similarity": 0.022857389356816478
+        }
+      ]
+    },
+    "anchor_controls": {
+      "passed": true,
+      "oracle": {
+        "id": "oracle",
+        "score": 1.0,
+        "passed": true,
+        "criteria": [
+          {
+            "id": "structured_decision",
+            "description": "Returns the required structured decision fields.",
+            "score": 1.0,
+            "weight": 0.3,
+            "contribution": 0.3,
+            "evidence": "required keys present",
+            "passed": true
+          },
+          {
+            "id": "required_tools",
+            "description": "Calls verification and audit tools.",
+            "score": 1.0,
+            "weight": 0.3,
+            "contribution": 0.3,
+            "evidence": "called: verify_signature, write_audit_log",
+            "passed": true
+          },
+          {
+            "id": "tool_reliability",
+            "description": "All recorded tool calls complete successfully.",
+            "score": 1.0,
+            "weight": 0.2,
+            "contribution": 0.2,
+            "evidence": "2/2 successful (1.000)",
+            "passed": true
+          },
+          {
+            "id": "trace_completeness",
+            "description": "The trace records planning and verification completion.",
+            "score": 1.0,
+            "weight": 0.2,
+            "contribution": 0.2,
+            "evidence": "all events present",
+            "passed": true
+          }
+        ],
+        "forbidden_hits": [],
+        "latency_ms": null,
+        "cost_usd": null,
+        "provider": null,
+        "model": null
+      },
+      "negative": {
+        "id": "negative",
+        "score": 0.0,
+        "passed": false,
+        "criteria": [
+          {
+            "id": "structured_decision",
+            "description": "Returns the required structured decision fields.",
+            "score": 0.0,
+            "weight": 0.3,
+            "contribution": 0.0,
+            "evidence": "missing keys: reason, audit_id",
+            "passed": false
+          },
+          {
+            "id": "required_tools",
+            "description": "Calls verification and audit tools.",
+            "score": 0.0,
+            "weight": 0.3,
+            "contribution": 0.0,
+            "evidence": "called: none",
+            "passed": false
+          },
+          {
+            "id": "tool_reliability",
+            "description": "All recorded tool calls complete successfully.",
+            "score": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "evidence": "no tool calls recorded",
+            "passed": false
+          },
+          {
+            "id": "trace_completeness",
+            "description": "The trace records planning and verification completion.",
+            "score": 0.0,
+            "weight": 0.2,
+            "contribution": 0.0,
+            "evidence": "missing events: plan_created, verification_completed",
+            "passed": false
+          }
+        ],
+        "forbidden_hits": [],
+        "latency_ms": null,
+        "cost_usd": null,
+        "provider": null,
+        "model": null
+      }
+    },
+    "trial_scoring": {
+      "passed": true,
+      "pass_rate": 1.0,
+      "mean_score": 1.0,
+      "passed_count": 1,
+      "total_count": 1,
+      "runs": [
+        {
+          "id": "agent-trial-01",
+          "score": 1.0,
+          "passed": true,
+          "criteria": [
+            {
+              "id": "structured_decision",
+              "description": "Returns the required structured decision fields.",
+              "score": 1.0,
+              "weight": 0.3,
+              "contribution": 0.3,
+              "evidence": "required keys present",
+              "passed": true
+            },
+            {
+              "id": "required_tools",
+              "description": "Calls verification and audit tools.",
+              "score": 1.0,
+              "weight": 0.3,
+              "contribution": 0.3,
+              "evidence": "called: verify_signature, write_audit_log",
+              "passed": true
+            },
+            {
+              "id": "tool_reliability",
+              "description": "All recorded tool calls complete successfully.",
+              "score": 1.0,
+              "weight": 0.2,
+              "contribution": 0.2,
+              "evidence": "2/2 successful (1.000)",
+              "passed": true
+            },
+            {
+              "id": "trace_completeness",
+              "description": "The trace records planning and verification completion.",
+              "score": 1.0,
+              "weight": 0.2,
+              "contribution": 0.2,
+              "evidence": "all events present",
+              "passed": true
+            }
+          ],
+          "forbidden_hits": [],
+          "latency_ms": 1430,
+          "cost_usd": 0.014,
+          "provider": "local",
+          "model": "example-agent"
+        }
+      ]
+    },
+    "evidence_audit": {
+      "failure_classes": {}
+    },
+    "spend_summary": {
+      "total_cost_usd": 0.014,
+      "average_cost_usd": 0.014,
+      "average_latency_ms": 1430.0
+    },
+    "release_gate": {
+      "passed": true
+    }
+  }
+}
