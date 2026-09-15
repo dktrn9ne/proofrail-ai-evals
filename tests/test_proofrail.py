@@ -1,7 +1,10 @@
 import unittest
+import json
+from pathlib import Path
 
 from proofrail.checks import cosine_similarity, normalize_run_text, score_output, validate_runs, validate_spec
 from proofrail.engine import run_review
+from proofrail.preflight import SURFACE_NAMES, run_preflight
 
 
 def sample_spec():
@@ -87,6 +90,19 @@ class ProofrailTests(unittest.TestCase):
         evaluators = {"always_one": lambda criterion, run, text: (1.0, "custom pass")}
         result = run_review(spec, [{"id": "one", "output": "anything"}], custom_evaluators=evaluators)
         self.assertTrue(result["stages"]["trial_scoring"]["runs"][0]["passed"])
+
+    def test_preflight_has_exactly_21_named_surfaces(self):
+        self.assertEqual(len(SURFACE_NAMES), 21)
+        self.assertEqual(len(set(SURFACE_NAMES)), 21)
+
+    def test_example_preflight_passes_all_surfaces(self):
+        root = Path(__file__).resolve().parents[1]
+        spec = json.loads((root / "examples" / "ledgerkit" / "spec.json").read_text(encoding="utf-8"))
+        runs = json.loads((root / "examples" / "ledgerkit" / "runs.json").read_text(encoding="utf-8"))
+        corpus = json.loads((root / "examples" / "regression-corpus" / "corpus.json").read_text(encoding="utf-8"))
+        result = run_preflight(spec, runs, corpus)
+        self.assertEqual(result["total_count"], 21)
+        self.assertEqual(result["decision"], "PASS", [surface for surface in result["surfaces"] if not surface["passed"]])
 
 
 if __name__ == "__main__":

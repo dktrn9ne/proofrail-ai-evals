@@ -1,0 +1,8 @@
+{
+  "id": "oracle-positive-control",
+  "purpose": "Prove that the evaluation accepts a known-good output satisfying every required criterion.",
+  "output": "Check the signature and integrity before acceptance. Treat malformed or unverifiable evidence as invalid: reject it and fail closed. Store the decision in an audit log for traceability.",
+  "review_scores": {"review_quality": 1.0},
+  "expected_result": "PASS",
+  "promotion_rule": "Block the evaluation suite if this control does not meet the candidate passing threshold."
+}

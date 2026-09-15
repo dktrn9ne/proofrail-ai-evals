@@ -1,0 +1,7 @@
+{
+  "id": "no-op-negative-control",
+  "purpose": "Prove that the evaluation rejects an output that performs no meaningful work.",
+  "output": "",
+  "expected_result": "FAIL",
+  "promotion_rule": "Block the evaluation suite if this control meets the candidate passing threshold."
+}

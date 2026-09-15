@@ -7,11 +7,11 @@ flowchart LR
     A[Hosted models] --> D[Universal run envelope]
     B[Local models] --> D
     C[Agent workflows] --> D
-    D --> E[Intake scan]
-    E --> F[Overlap scan]
-    F --> G[Anchor controls]
-    G --> H[Trial scoring]
-    H --> I[Evidence audit]
+    D --> E[21-surface preflight]
+    E --> F[Intake and overlap scans]
+    F --> G[Oracle and NO OP controls]
+    G --> H[Repeated trial scoring]
+    H --> I[Evidence audit and corpus promotion]
     I --> J[Release gate]
     J --> K[Markdown report]
     J --> L[JSON evidence]

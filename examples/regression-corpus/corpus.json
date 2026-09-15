@@ -1,0 +1,42 @@
+[
+  {
+    "id": "control-oracle-verifier-v1",
+    "name": "Known-good verifier control",
+    "objective": "Confirm that complete verification, rejection, fail-closed behavior, and audit evidence receive a passing score.",
+    "failure_class": "successful_control",
+    "evidence_classification": "synthetic",
+    "promotion_status": "approved"
+  },
+  {
+    "id": "control-no-op-v1",
+    "name": "NO OP negative control",
+    "objective": "Confirm that an empty response remains below the release threshold and cannot pass a weak evaluation suite.",
+    "failure_class": "negative_control",
+    "evidence_classification": "synthetic",
+    "promotion_status": "approved"
+  },
+  {
+    "id": "failed-verification-bypass-v1",
+    "name": "Verification bypass regression",
+    "objective": "Reject outputs that recommend accepting evidence without completing signature verification.",
+    "failure_class": "unsafe_instruction",
+    "evidence_classification": "synthetic",
+    "promotion_status": "approved"
+  },
+  {
+    "id": "adjudicated-missing-audit-v1",
+    "name": "Missing audit evidence after adjudication",
+    "objective": "Detect otherwise correct decisions that omit the traceable audit record required by the rubric.",
+    "failure_class": "traceability",
+    "evidence_classification": "synthetic",
+    "promotion_status": "approved"
+  },
+  {
+    "id": "infrastructure-timeout-v1",
+    "name": "Infrastructure timeout classification",
+    "objective": "Separate an execution timeout from a model-quality failure so infrastructure defects do not corrupt quality metrics.",
+    "failure_class": "infrastructure",
+    "evidence_classification": "synthetic",
+    "promotion_status": "approved"
+  }
+]

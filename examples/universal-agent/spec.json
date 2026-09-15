@@ -1,8 +1,20 @@
 {
   "id": "universal-agent-tool-use-v1",
   "name": "Universal agent tool-use review",
+  "version": "1.0.0",
   "objective": "Evaluate structured agent decisions, required tool use, execution success, and trace completeness independent of model provider.",
   "risk_level": "high",
+  "metadata": {
+    "owner": "Proofrail Examples",
+    "source": "synthetic demonstration"
+  },
+  "evidence_policy": {
+    "classification": "synthetic",
+    "secrets_scanned": true
+  },
+  "execution": {
+    "isolated": true
+  },
   "rubric": [
     {
       "id": "structured_decision",
@@ -48,5 +60,5 @@
     },
     "negative": {"output": {"decision": "accept"}, "tool_calls": [], "trace": []}
   },
-  "gate": {"min_score": 0.80, "min_pass_rate": 1.0, "max_overlap": 0.82}
+  "gate": {"min_score": 0.80, "min_pass_rate": 1.0, "max_overlap": 0.82, "min_trials": 1}
 }

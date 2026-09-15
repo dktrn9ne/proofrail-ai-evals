@@ -1,0 +1,114 @@
+{
+  "framework": "Proofrail",
+  "spec_id": "ledgerkit-verifier-semantics-v1",
+  "decision": "PASS",
+  "passed_count": 21,
+  "total_count": 21,
+  "surfaces": [
+    {
+      "name": "specification_identity",
+      "passed": true,
+      "evidence": "id, name, and version are required"
+    },
+    {
+      "name": "objective_definition",
+      "passed": true,
+      "evidence": "objective must contain at least 20 characters"
+    },
+    {
+      "name": "risk_classification",
+      "passed": true,
+      "evidence": "risk_level=high"
+    },
+    {
+      "name": "traceability",
+      "passed": true,
+      "evidence": "metadata.owner and metadata.source are required"
+    },
+    {
+      "name": "rubric_presence",
+      "passed": true,
+      "evidence": "criteria=4"
+    },
+    {
+      "name": "criterion_identity",
+      "passed": true,
+      "evidence": "criterion ids must be present and unique"
+    },
+    {
+      "name": "criterion_descriptions",
+      "passed": true,
+      "evidence": "every criterion requires a description"
+    },
+    {
+      "name": "weight_integrity",
+      "passed": true,
+      "evidence": "weight_total=1.000000"
+    },
+    {
+      "name": "evaluator_support",
+      "passed": true,
+      "evidence": "available=9 evaluators"
+    },
+    {
+      "name": "evaluator_parameters",
+      "passed": true,
+      "evidence": "built-in evaluator parameters must be valid"
+    },
+    {
+      "name": "gate_thresholds",
+      "passed": true,
+      "evidence": "min_trials=3"
+    },
+    {
+      "name": "oracle_control",
+      "passed": true,
+      "evidence": "known-good control is required"
+    },
+    {
+      "name": "negative_control",
+      "passed": true,
+      "evidence": "NO OP negative control is required"
+    },
+    {
+      "name": "control_discrimination",
+      "passed": true,
+      "evidence": "oracle=1.000; no_op=0.000"
+    },
+    {
+      "name": "trial_coverage",
+      "passed": true,
+      "evidence": "runs=3; required=3"
+    },
+    {
+      "name": "trial_integrity",
+      "passed": true,
+      "evidence": "run ids must be unique and telemetry non-negative"
+    },
+    {
+      "name": "evidence_coverage",
+      "passed": true,
+      "evidence": "every run requires output, messages, tool calls, trace, or artifacts"
+    },
+    {
+      "name": "protected_evidence",
+      "passed": true,
+      "evidence": "classification=synthetic; secrets_scanned=True"
+    },
+    {
+      "name": "process_isolation",
+      "passed": true,
+      "evidence": "isolated=True"
+    },
+    {
+      "name": "corpus_integrity",
+      "passed": true,
+      "evidence": "corpus_records=5"
+    },
+    {
+      "name": "corpus_novelty",
+      "passed": true,
+      "evidence": "maximum_similarity=0.269; limit=0.82"
+    }
+  ]
+}

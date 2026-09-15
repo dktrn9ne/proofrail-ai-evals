@@ -2,11 +2,13 @@
   {
     "id": "billing-agent-policy-v2",
     "name": "Billing agent refund policy",
-    "objective": "Evaluate whether a billing agent follows refund limits, requests approval, and records customer-facing actions."
+    "objective": "Evaluate whether a billing agent follows refund limits, requests approval, and records customer-facing actions.",
+    "failure_class": "policy_boundary"
   },
   {
     "id": "catalog-grounding-v1",
     "name": "Catalog assistant grounding",
-    "objective": "Measure whether product recommendations remain grounded in current catalog data and identify missing attributes."
+    "objective": "Measure whether product recommendations remain grounded in current catalog data and identify missing attributes.",
+    "failure_class": "grounding"
   }
 ]

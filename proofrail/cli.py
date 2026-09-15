@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .engine import run_review
+from .preflight import markdown_preflight, run_preflight
 from .report import markdown_report
 
 
@@ -39,6 +40,12 @@ def build_parser() -> argparse.ArgumentParser:
     review.add_argument("--corpus", help="optional comparison corpus JSON")
     review.add_argument("--out", default="artifacts", help="output directory")
     review.add_argument("--evaluators", help="optional trusted Python module exposing an EVALUATORS dictionary")
+    preflight = subparsers.add_parser("preflight", help="run the 21-surface evaluation preflight")
+    preflight.add_argument("--spec", required=True, help="path to the evaluation specification JSON")
+    preflight.add_argument("--runs", required=True, help="path to model run JSON")
+    preflight.add_argument("--corpus", required=True, help="path to the regression corpus JSON")
+    preflight.add_argument("--out", default="artifacts", help="output directory")
+    preflight.add_argument("--evaluators", help="optional trusted Python module exposing an EVALUATORS dictionary")
     return parser
 
 
@@ -47,10 +54,20 @@ def main(argv: list[str] | None = None) -> int:
     spec = load_json(args.spec)
     runs = load_json(args.runs)
     corpus = load_json(args.corpus) if args.corpus else []
-    result = run_review(spec, runs, corpus, load_evaluators(args.evaluators))
+    custom_evaluators = load_evaluators(args.evaluators)
 
     output_directory = Path(args.out)
     output_directory.mkdir(parents=True, exist_ok=True)
+    if args.command == "preflight":
+        result = run_preflight(spec, runs, corpus, custom_evaluators)
+        (output_directory / "proofrail-preflight.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+        (output_directory / "proofrail-preflight.md").write_text(markdown_preflight(result), encoding="utf-8")
+        print(f"Proofrail preflight: {result['decision']} ({result['passed_count']}/{result['total_count']})")
+        print(f"Report: {output_directory / 'proofrail-preflight.md'}")
+        return 0 if result["decision"] == "PASS" else 1
+
+    result = run_review(spec, runs, corpus, custom_evaluators)
+
     (output_directory / "proofrail-results.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     (output_directory / "proofrail-report.md").write_text(markdown_report(result), encoding="utf-8")
 

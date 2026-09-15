@@ -14,6 +14,8 @@ Proofrail is a provider-neutral quality gate for reviewing any AI model or agent
 6. **Release gate** combines specification validity, originality, control discrimination, score, and pass-rate requirements.
 7. **Spend summary** reports total and average latency and cost when run metadata is available.
 
+Before the release review, the dedicated **21-surface preflight** validates evaluation design, controls, trial coverage, evidence handling, isolation, regression-corpus integrity, and task novelty.
+
 The included evaluators are deliberately deterministic and dependency-free. They are suitable for structural, policy, tool-use, agent-trace, and expected-content checks. Subjective criteria can be supplied as review scores in each run, allowing a calibrated human or model judge to plug into the same gate.
 
 ## Universal run envelope
@@ -46,6 +48,7 @@ Anchor controls may use the same complete envelope. An agent evaluation can ther
 From this directory:
 
 ```powershell
+python -m proofrail preflight --spec examples/ledgerkit/spec.json --runs examples/ledgerkit/runs.json --corpus examples/regression-corpus/corpus.json --out artifacts/preflight
 python -m proofrail review --spec examples/ledgerkit/spec.json --runs examples/ledgerkit/runs.json --corpus examples/corpus.json --out artifacts
 ```
 
@@ -53,6 +56,8 @@ The command writes:
 
 - `artifacts/proofrail-report.md`
 - `artifacts/proofrail-results.json`
+
+Preflight writes `proofrail-preflight.md` and `proofrail-preflight.json`. It exits with code `1` unless all 21 validation surfaces pass.
 
 It exits with code `0` when the release gate passes and `1` when it fails, so the same command can protect a pull request.
 
@@ -107,7 +112,7 @@ The workflow at `.github/workflows/proofrail-review.yml` runs unit tests and the
 
 ## Architecture and scope
 
-The [architecture overview](docs/architecture.md) explains the provider-neutral evidence contract and release semantics. The [enterprise readiness roadmap](docs/enterprise-roadmap.md) distinguishes implemented capabilities from the security, statistical, execution, and governance work still required for production deployment.
+The [architecture overview](docs/architecture.md) explains the provider-neutral evidence contract and release semantics. The [evaluation lifecycle](docs/evaluation-lifecycle.md) documents preflight, Oracle and NO OP controls, trial scoring, failure classification, corpus promotion, and release gating. The [regression corpus guide](docs/regression-corpus.md) defines promotion requirements. The [enterprise readiness roadmap](docs/enterprise-roadmap.md) distinguishes implemented capabilities from the security, statistical, execution, and governance work still required for production deployment.
 
 ## Security
 

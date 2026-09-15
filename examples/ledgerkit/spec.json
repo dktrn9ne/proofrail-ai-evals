@@ -1,8 +1,20 @@
 {
   "id": "ledgerkit-verifier-semantics-v1",
   "name": "LedgerKit verifier semantics",
+  "version": "1.0.0",
   "objective": "Evaluate whether a model explains safe ledger verification, rejects malformed evidence, and preserves fail-closed behavior.",
   "risk_level": "high",
+  "metadata": {
+    "owner": "Proofrail Examples",
+    "source": "synthetic demonstration"
+  },
+  "evidence_policy": {
+    "classification": "synthetic",
+    "secrets_scanned": true
+  },
+  "execution": {
+    "isolated": true
+  },
   "rubric": [
     {
       "id": "verification_contract",
@@ -47,6 +59,7 @@
   "gate": {
     "min_score": 0.75,
     "min_pass_rate": 0.66,
-    "max_overlap": 0.82
+    "max_overlap": 0.82,
+    "min_trials": 3
   }
 }
