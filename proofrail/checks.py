@@ -15,6 +15,15 @@ SUPPORTED_EVALUATORS = {
 Evaluator = Callable[[dict[str, Any], dict[str, Any], str], tuple[float, str]]
 
 
+def finite_number(value: Any) -> bool:
+    """JSON telemetry and thresholds must be real, finite numbers, not booleans."""
+    return type(value) in (int, float) and math.isfinite(value)
+
+
+def valid_min_trials(value: Any) -> bool:
+    return type(value) is int and value >= 1
+
+
 def normalize_run_text(run: dict[str, Any]) -> str:
     """Flatten a provider-neutral run envelope into searchable evaluation text."""
     fragments: list[str] = []
@@ -33,6 +42,8 @@ def normalize_run_text(run: dict[str, Any]) -> str:
 
 def validate_spec(spec: dict[str, Any], custom_evaluator_names: set[str] | None = None) -> list[str]:
     errors: list[str] = []
+    if not isinstance(spec, dict):
+        return ["spec must be an object"]
     for key in ("id", "name", "objective", "rubric", "controls", "gate"):
         if key not in spec:
             errors.append(f"missing required field: {key}")
@@ -47,16 +58,21 @@ def validate_spec(spec: dict[str, Any], custom_evaluator_names: set[str] | None 
     available = SUPPORTED_EVALUATORS | (custom_evaluator_names or set())
     for index, criterion in enumerate(rubric):
         prefix = f"rubric[{index}]"
+        if not isinstance(criterion, dict):
+            errors.append(f"{prefix} must be an object")
+            continue
         identifier = criterion.get("id")
-        if not identifier:
-            errors.append(f"{prefix} is missing id")
+        if not isinstance(identifier, str) or not identifier.strip():
+            errors.append(f"{prefix} id must be a non-empty string")
         else:
             identifiers.append(str(identifier))
         evaluator = criterion.get("evaluator")
-        if evaluator not in available:
+        if not isinstance(evaluator, str) or evaluator not in available:
             errors.append(f"{prefix} uses unsupported evaluator: {evaluator}")
+        if not isinstance(criterion.get("params", {}), dict):
+            errors.append(f"{prefix}.params must be an object")
         weight = criterion.get("weight")
-        if not isinstance(weight, (int, float)) or weight <= 0:
+        if not finite_number(weight) or weight <= 0:
             errors.append(f"{prefix} weight must be greater than zero")
         else:
             weights += float(weight)
@@ -70,10 +86,14 @@ def validate_spec(spec: dict[str, Any], custom_evaluator_names: set[str] | None 
     if not isinstance(controls, dict) or "oracle" not in controls or "negative" not in controls:
         errors.append("controls must include oracle and negative outputs")
     gate = spec.get("gate", {})
+    if not isinstance(gate, dict):
+        return errors + ["gate must be an object"]
     for key in ("min_score", "min_pass_rate", "max_overlap"):
         value = gate.get(key)
-        if not isinstance(value, (int, float)) or not 0 <= value <= 1:
+        if not finite_number(value) or not 0 <= value <= 1:
             errors.append(f"gate.{key} must be between 0 and 1")
+    if not valid_min_trials(gate.get("min_trials", 1)):
+        errors.append("gate.min_trials must be a positive integer")
     return errors
 
 
@@ -82,24 +102,34 @@ def validate_runs(runs: Any) -> list[str]:
     if not isinstance(runs, list) or not runs:
         return ["runs must be a non-empty list"]
     evidence_fields = {"output", "messages", "tool_calls", "trace", "artifacts"}
+    identifiers: list[str] = []
     for index, run in enumerate(runs):
         prefix = f"runs[{index}]"
         if not isinstance(run, dict):
             errors.append(f"{prefix} must be an object")
             continue
-        if not run.get("id"):
-            errors.append(f"{prefix} is missing id")
+        identifier = run.get("id")
+        if not isinstance(identifier, str) or not identifier.strip():
+            errors.append(f"{prefix} id must be a non-empty string")
+        else:
+            identifiers.append(identifier)
         if not evidence_fields.intersection(run):
             errors.append(f"{prefix} must include at least one evidence field: {', '.join(sorted(evidence_fields))}")
         for field in ("messages", "tool_calls", "trace", "artifacts"):
             if field in run and not isinstance(run[field], list):
                 errors.append(f"{prefix}.{field} must be a list")
         for field in ("latency_ms", "cost_usd"):
-            if field in run and (not isinstance(run[field], (int, float)) or run[field] < 0):
-                errors.append(f"{prefix}.{field} must be a non-negative number")
-        for criterion, score in (run.get("review_scores") or {}).items():
-            if not isinstance(score, (int, float)) or not 0 <= score <= 1:
+            if field in run and (not finite_number(run[field]) or run[field] < 0):
+                errors.append(f"{prefix}.{field} must be a finite non-negative number")
+        review_scores = run.get("review_scores", {})
+        if not isinstance(review_scores, dict):
+            errors.append(f"{prefix}.review_scores must be an object")
+            continue
+        for criterion, score in review_scores.items():
+            if not finite_number(score) or not 0 <= score <= 1:
                 errors.append(f"{prefix}.review_scores.{criterion} must be between 0 and 1")
+    if len(identifiers) != len(set(identifiers)):
+        errors.append("run ids must be unique")
     return errors
 
 

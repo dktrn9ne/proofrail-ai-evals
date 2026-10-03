@@ -45,6 +45,8 @@ A candidate can be released only when:
 1. The evaluation specification and run envelopes are valid.
 2. The task does not exceed the configured overlap threshold.
 3. The oracle passes and the negative control fails.
-4. The required proportion of repeated trials passes.
+4. At least `gate.min_trials` runs are supplied and the required proportion passes. Review defaults to one trial for legacy specifications that omit `min_trials`; preflight requires an explicit minimum.
+
+The review command enforces its release checks independently; run the complete preflight separately to validate all 21 design and evidence surfaces.
 
 The report preserves individual failures even when the aggregate release gate passes.

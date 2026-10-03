@@ -10,7 +10,7 @@
 | Intake scan | PASS | 0 specification errors |
 | Overlap scan | PASS | Maximum similarity 0.132 |
 | Anchor controls | PASS | Oracle 1.000; negative 0.000 |
-| Trial scoring | PASS | 1/1 passed; mean 1.000 |
+| Trial scoring | PASS | 1/1 passed; required trials 1; coverage PASS; mean 1.000 |
 | Release gate | PASS | RELEASE |
 
 ## Trial evidence
