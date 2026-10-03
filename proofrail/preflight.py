@@ -4,7 +4,7 @@ import json
 import re
 from typing import Any
 
-from .checks import Evaluator, SUPPORTED_EVALUATORS, overlap_scan, score_output
+from .checks import Evaluator, SUPPORTED_EVALUATORS, overlap_scan, score_output, finite_number, valid_min_trials, validate_spec, validate_runs
 
 
 SURFACE_NAMES = (
@@ -75,7 +75,12 @@ def run_preflight(
     corpus: list[dict[str, Any]],
     custom_evaluators: dict[str, Evaluator] | None = None,
 ) -> dict[str, Any]:
+    spec = spec if isinstance(spec, dict) else {}
+    runs = runs if isinstance(runs, list) else []
+    corpus = corpus if isinstance(corpus, list) else []
     rubric = spec.get("rubric", []) if isinstance(spec.get("rubric", []), list) else []
+    rubric_objects = [c for c in rubric if isinstance(c, dict)]
+    rubric_shape_ok = bool(rubric) and len(rubric_objects) == len(rubric)
     controls = spec.get("controls", {}) if isinstance(spec.get("controls", {}), dict) else {}
     gate = spec.get("gate", {}) if isinstance(spec.get("gate", {}), dict) else {}
     metadata = spec.get("metadata", {}) if isinstance(spec.get("metadata", {}), dict) else {}
@@ -93,20 +98,20 @@ def run_preflight(
 
     surfaces.append(_surface("rubric_presence", bool(rubric), f"criteria={len(rubric)}"))
     criterion_ids = [criterion.get("id") for criterion in rubric if isinstance(criterion, dict)]
-    criterion_identity_ok = len(criterion_ids) == len(rubric) and all(criterion_ids) and len(criterion_ids) == len(set(criterion_ids))
+    criterion_identity_ok = len(criterion_ids) == len(rubric) and all(isinstance(i, str) and i.strip() for i in criterion_ids) and len(criterion_ids) == len(set(criterion_ids))
     surfaces.append(_surface("criterion_identity", criterion_identity_ok, "criterion ids must be present and unique"))
-    descriptions_ok = bool(rubric) and all(isinstance(c.get("description"), str) and c["description"].strip() for c in rubric)
+    descriptions_ok = rubric_shape_ok and all(isinstance(c.get("description"), str) and c["description"].strip() for c in rubric_objects)
     surfaces.append(_surface("criterion_descriptions", descriptions_ok, "every criterion requires a description"))
-    weights = [c.get("weight") for c in rubric]
-    weights_ok = bool(weights) and all(isinstance(weight, (int, float)) and weight > 0 for weight in weights) and abs(sum(weights) - 1.0) <= 1e-6
+    weights = [c.get("weight") for c in rubric_objects]
+    weights_ok = rubric_shape_ok and all(finite_number(weight) and weight > 0 for weight in weights) and abs(sum(weights) - 1.0) <= 1e-6
     surfaces.append(_surface("weight_integrity", weights_ok, f"weight_total={sum(w for w in weights if isinstance(w, (int, float))):.6f}"))
-    evaluator_support_ok = bool(rubric) and all(c.get("evaluator") in available_evaluators for c in rubric)
+    evaluator_support_ok = rubric_shape_ok and all(isinstance(c.get("evaluator"), str) and c["evaluator"] in available_evaluators for c in rubric_objects)
     surfaces.append(_surface("evaluator_support", evaluator_support_ok, f"available={len(available_evaluators)} evaluators"))
-    evaluator_parameters_ok = bool(rubric) and all(_parameters_valid(c) for c in rubric)
+    evaluator_parameters_ok = evaluator_support_ok and all(_parameters_valid(c) for c in rubric_objects)
     surfaces.append(_surface("evaluator_parameters", evaluator_parameters_ok, "built-in evaluator parameters must be valid"))
 
-    threshold_values_ok = all(isinstance(gate.get(key), (int, float)) and 0 <= gate[key] <= 1 for key in ("min_score", "min_pass_rate", "max_overlap"))
-    min_trials_ok = isinstance(gate.get("min_trials"), int) and gate["min_trials"] >= 1
+    threshold_values_ok = all(finite_number(gate.get(key)) and 0 <= gate[key] <= 1 for key in ("min_score", "min_pass_rate", "max_overlap"))
+    min_trials_ok = valid_min_trials(gate.get("min_trials"))
     surfaces.append(_surface("gate_thresholds", threshold_values_ok and min_trials_ok, f"min_trials={gate.get('min_trials')}"))
 
     oracle_present = "oracle" in controls
@@ -115,22 +120,22 @@ def run_preflight(
     surfaces.append(_surface("negative_control", negative_present, "NO OP negative control is required"))
     discrimination_ok = False
     discrimination_evidence = "controls could not be scored"
-    if oracle_present and negative_present and rubric and threshold_values_ok:
+    if oracle_present and negative_present and evaluator_parameters_ok and not validate_spec(spec, set((custom_evaluators or {}).keys())):
         oracle = score_output(spec, _control_run("oracle", controls["oracle"], controls.get("oracle_review_scores", {})), custom_evaluators)
         negative = score_output(spec, _control_run("negative", controls["negative"], controls.get("negative_review_scores", {})), custom_evaluators)
         discrimination_ok = oracle["passed"] and not negative["passed"]
         discrimination_evidence = f"oracle={oracle['score']:.3f}; no_op={negative['score']:.3f}"
     surfaces.append(_surface("control_discrimination", discrimination_ok, discrimination_evidence))
 
-    min_trials = gate.get("min_trials", 1) if isinstance(gate.get("min_trials", 1), int) else 1
-    surfaces.append(_surface("trial_coverage", isinstance(runs, list) and len(runs) >= min_trials, f"runs={len(runs) if isinstance(runs, list) else 0}; required={min_trials}"))
+    min_trials = gate.get("min_trials", 1) if valid_min_trials(gate.get("min_trials", 1)) else 1
+    surfaces.append(_surface("trial_coverage", min_trials_ok and len(runs) >= min_trials, f"runs={len(runs) if isinstance(runs, list) else 0}; required={min_trials}"))
     run_ids = [run.get("id") for run in runs if isinstance(run, dict)] if isinstance(runs, list) else []
     telemetry_ok = all(
-        (field not in run or isinstance(run[field], (int, float)) and run[field] >= 0)
+        (field not in run or finite_number(run[field]) and run[field] >= 0)
         for run in runs if isinstance(run, dict) for field in ("latency_ms", "cost_usd")
     )
-    run_integrity_ok = len(run_ids) == len(runs) and all(run_ids) and len(run_ids) == len(set(run_ids)) and telemetry_ok
-    surfaces.append(_surface("trial_integrity", run_integrity_ok, "run ids must be unique and telemetry non-negative"))
+    run_integrity_ok = len(run_ids) == len(runs) and all(isinstance(i, str) and i.strip() for i in run_ids) and len(run_ids) == len(set(run_ids)) and telemetry_ok and not validate_runs(runs)
+    surfaces.append(_surface("trial_integrity", run_integrity_ok, "run ids must be unique and telemetry finite and non-negative"))
     evidence_fields = {"output", "messages", "tool_calls", "trace", "artifacts"}
     evidence_ok = bool(runs) and all(isinstance(run, dict) and bool(evidence_fields.intersection(run)) for run in runs)
     surfaces.append(_surface("evidence_coverage", evidence_ok, "every run requires output, messages, tool calls, trace, or artifacts"))
@@ -149,7 +154,7 @@ def run_preflight(
     )
     corpus_integrity_ok = corpus_fields_ok and len(corpus_ids) == len(set(corpus_ids))
     surfaces.append(_surface("corpus_integrity", corpus_integrity_ok, f"corpus_records={len(corpus) if isinstance(corpus, list) else 0}"))
-    overlap = overlap_scan(spec, corpus if isinstance(corpus, list) else [])
+    overlap = overlap_scan(spec, [item for item in corpus if isinstance(item, dict)])
     novelty_ok = threshold_values_ok and overlap["maximum"] <= gate["max_overlap"]
     surfaces.append(_surface("corpus_novelty", novelty_ok, f"maximum_similarity={overlap['maximum']:.3f}; limit={gate.get('max_overlap')}"))
 

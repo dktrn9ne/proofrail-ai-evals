@@ -1,10 +1,14 @@
 import unittest
 import json
+import copy
 from pathlib import Path
 
 from proofrail.checks import cosine_similarity, normalize_run_text, score_output, validate_runs, validate_spec
 from proofrail.engine import run_review
 from proofrail.preflight import SURFACE_NAMES, run_preflight
+from proofrail.report import markdown_report
+from proofrail.cli import main
+import tempfile
 
 
 def sample_spec():
@@ -21,6 +25,81 @@ def sample_spec():
 
 
 class ProofrailTests(unittest.TestCase):
+    def example_inputs(self):
+        root = Path(__file__).resolve().parents[1] / "examples"
+        return tuple(json.loads((root / path).read_text(encoding="utf-8")) for path in (
+            "ledgerkit/spec.json", "ledgerkit/runs.json", "regression-corpus/corpus.json"))
+
+    def test_review_enforces_trial_coverage(self):
+        spec, runs, corpus = self.example_inputs()
+        required = spec["gate"]["min_trials"]
+        for count in (1, required - 1, required):
+            with self.subTest(count=count):
+                result = run_review(spec, runs[:count], corpus)
+                self.assertEqual(result["decision"], "RELEASE" if count >= required else "BLOCK")
+                self.assertEqual(result["stages"]["trial_scoring"]["coverage_passed"], count >= required)
+                coverage = next(s for s in run_preflight(spec, runs[:count], corpus)["surfaces"] if s["name"] == "trial_coverage")
+                self.assertEqual(coverage["passed"], count >= required)
+                self.assertIn(f"required trials {required}", markdown_report(result))
+
+    def test_invalid_min_trials_blocks_both_paths(self):
+        spec, runs, corpus = self.example_inputs()
+        for value in (0, -1, True, 1.5, "3", None):
+            with self.subTest(value=value):
+                spec["gate"]["min_trials"] = value
+                self.assertEqual(run_review(spec, runs, corpus)["decision"], "BLOCK")
+                self.assertEqual(run_preflight(spec, runs, corpus)["decision"], "BLOCK")
+
+    def test_malformed_rubric_blocks_without_exception(self):
+        spec, runs, corpus = self.example_inputs()
+        for value in (None, "criterion", 7, [], True):
+            for rubric in ([value], [copy.deepcopy(spec["rubric"][0]), value]):
+                with self.subTest(value=value, mixed=len(rubric) > 1):
+                    bad = copy.deepcopy(spec)
+                    bad["rubric"] = rubric
+                    review = run_review(bad, runs, corpus)
+                    self.assertEqual(review["decision"], "BLOCK")
+                    self.assertTrue(any("must be an object" in e for e in review["stages"]["intake_scan"]["errors"]))
+                    preflight = run_preflight(bad, runs, corpus)
+                    self.assertEqual(preflight["decision"], "BLOCK")
+                    self.assertEqual(preflight["total_count"], 21)
+
+    def test_nonfinite_and_boolean_telemetry_blocks_both_paths(self):
+        spec, runs, corpus = self.example_inputs()
+        for field in ("cost_usd", "latency_ms"):
+            for value in (float("inf"), float("-inf"), float("nan"), True):
+                with self.subTest(field=field, value=value):
+                    bad = copy.deepcopy(runs)
+                    bad[0][field] = value
+                    self.assertTrue(validate_runs(bad))
+                    self.assertEqual(run_review(spec, bad, corpus)["decision"], "BLOCK")
+                    result = run_preflight(spec, bad, corpus)
+                    self.assertFalse(next(s for s in result["surfaces"] if s["name"] == "trial_integrity")["passed"])
+
+    def test_finite_zero_telemetry_is_valid(self):
+        self.assertEqual(validate_runs([{"id": "zero", "output": "safe", "cost_usd": 0, "latency_ms": 0.0}]), [])
+
+    def test_duplicate_ids_cannot_inflate_coverage(self):
+        spec, runs, corpus = self.example_inputs()
+        duplicates = [copy.deepcopy(runs[0]) for _ in range(spec["gate"]["min_trials"])]
+        self.assertEqual(run_review(spec, duplicates, corpus)["decision"], "BLOCK")
+        self.assertEqual(run_preflight(spec, duplicates, corpus)["decision"], "BLOCK")
+
+    def test_cli_blocks_and_writes_reports_for_invalid_inputs(self):
+        spec, runs, corpus = self.example_inputs()
+        cases = [(spec, runs[:1]), ({**spec, "rubric": [None]}, runs),
+                 (spec, [{**runs[0], "cost_usd": float("inf")}, *runs[1:]])]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for command in ("review", "preflight"):
+                for bad_spec, bad_runs in cases:
+                    for name, value in (("spec", bad_spec), ("runs", bad_runs), ("corpus", corpus)):
+                        (root / f"{name}.json").write_text(json.dumps(value), encoding="utf-8")
+                    self.assertEqual(main([command, "--spec", str(root / "spec.json"), "--runs", str(root / "runs.json"),
+                                           "--corpus", str(root / "corpus.json"), "--out", str(root / "out")]), 1)
+                    report = "proofrail-results.json" if command == "review" else "proofrail-preflight.json"
+                    self.assertEqual(json.loads((root / "out" / report).read_text())["decision"], "BLOCK")
+
     def test_valid_spec(self):
         self.assertEqual(validate_spec(sample_spec()), [])
 

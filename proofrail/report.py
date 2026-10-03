@@ -34,7 +34,7 @@ def markdown_report(result: dict[str, Any]) -> str:
     lines.extend([
         f"| Overlap scan | {_mark(overlap['passed'])} | Maximum similarity {overlap['maximum']:.3f} |",
         f"| Anchor controls | {_mark(controls['passed'])} | Oracle {controls['oracle']['score']:.3f}; negative {controls['negative']['score']:.3f} |",
-        f"| Trial scoring | {_mark(trials['passed'])} | {trials['passed_count']}/{trials['total_count']} passed; mean {trials['mean_score']:.3f} |",
+        f"| Trial scoring | {_mark(trials['passed'])} | {trials['passed_count']}/{trials['total_count']} passed; required trials {trials['min_trials']}; coverage {_mark(trials['coverage_passed'])}; mean {trials['mean_score']:.3f} |",
         f"| Release gate | {_mark(stages['release_gate']['passed'])} | {result['decision']} |",
         "",
         "## Trial evidence",

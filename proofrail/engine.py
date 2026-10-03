@@ -27,7 +27,7 @@ def run_review(
     if intake_errors:
         return {
             "framework": "Proofrail",
-            "spec_id": spec.get("id", "unknown"),
+            "spec_id": spec.get("id", "unknown") if isinstance(spec, dict) else "unknown",
             "decision": "BLOCK",
             "stages": {"intake_scan": {"passed": False, "errors": intake_errors}},
         }
@@ -55,7 +55,9 @@ def run_review(
     costs = [float(run["cost_usd"]) for run in scored_runs if isinstance(run.get("cost_usd"), (int, float))]
     latencies = [float(run["latency_ms"]) for run in scored_runs if isinstance(run.get("latency_ms"), (int, float))]
 
-    trial_gate_passed = bool(scored_runs) and pass_rate >= float(spec["gate"]["min_pass_rate"])
+    min_trials = spec["gate"].get("min_trials", 1)
+    coverage_passed = len(scored_runs) >= min_trials
+    trial_gate_passed = coverage_passed and pass_rate >= float(spec["gate"]["min_pass_rate"])
     release_passed = overlap_passed and controls_passed and trial_gate_passed
 
     return {
@@ -69,6 +71,8 @@ def run_review(
             "anchor_controls": {"passed": controls_passed, "oracle": oracle, "negative": negative},
             "trial_scoring": {
                 "passed": trial_gate_passed,
+                "coverage_passed": coverage_passed,
+                "min_trials": min_trials,
                 "pass_rate": round(pass_rate, 6),
                 "mean_score": round(mean_score, 6),
                 "passed_count": passed_count,

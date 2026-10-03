@@ -11,7 +11,7 @@ Proofrail is a provider-neutral quality gate for reviewing any AI model or agent
 3. **Anchor controls** require a known-good oracle to pass and a deliberately empty negative control to fail.
 4. **Trial scoring** evaluates every run against deterministic rubric criteria and records criterion-level evidence.
 5. **Evidence audit** summarizes recurring failure classes rather than reporting only an aggregate score.
-6. **Release gate** combines specification validity, originality, control discrimination, score, and pass-rate requirements.
+6. **Release gate** combines specification validity, originality, control discrimination, score, configured minimum trial count, and pass-rate requirements.
 7. **Spend summary** reports total and average latency and cost when run metadata is available.
 
 Before the release review, the dedicated **21-surface preflight** validates evaluation design, controls, trial coverage, evidence handling, isolation, regression-corpus integrity, and task novelty.
@@ -60,6 +60,8 @@ The command writes:
 Preflight writes `proofrail-preflight.md` and `proofrail-preflight.json`. It exits with code `1` unless all 21 validation surfaces pass.
 
 It exits with code `0` when the release gate passes and `1` when it fails, so the same command can protect a pull request.
+
+Review enforces `gate.min_trials` when supplied (a positive integer); legacy review specifications that omit it default to one trial. Preflight requires an explicit `min_trials`. Review does not replace the complete 21-surface preflight: CI should run both. Telemetry must be finite and non-negative. The report records required trial count and coverage alongside pass rate.
 
 ## Evaluation specification
 

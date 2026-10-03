@@ -125,6 +125,8 @@
     },
     "trial_scoring": {
       "passed": true,
+      "coverage_passed": true,
+      "min_trials": 1,
       "pass_rate": 1.0,
       "mean_score": 1.0,
       "passed_count": 1,
