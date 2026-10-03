@@ -63,8 +63,6 @@ It exits with code `0` when the release gate passes and `1` when it fails, so th
 
 Review enforces `gate.min_trials` when supplied (a positive integer); legacy review specifications that omit it default to one trial. Preflight requires an explicit `min_trials`. Review does not replace the complete 21-surface preflight: CI should run both. Telemetry must be finite and non-negative. The report records required trial count and coverage alongside pass rate.
 
-Review enforces `gate.min_trials` when supplied (a positive integer); legacy review specifications that omit it default to one trial. Preflight requires an explicit `min_trials`. Review does not replace the complete 21-surface preflight: CI should run both. Telemetry must be finite and non-negative. The report records required trial count and coverage alongside pass rate.
-
 ## Evaluation specification
 
 Each rubric item has an ID, description, weight, evaluator, and parameters. Supported evaluators are:
